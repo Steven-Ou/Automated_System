@@ -1,0 +1,17 @@
+{
+  "personal_info": {
+    "first_name": "Steven",
+    "last_name": "Ou",
+    "email": "your_email@example.com",
+    "phone": "YOUR_PHONE",
+    "location": "Queens, NY",
+    "github": "https://github.com/stevenou",
+    "linkedin": "https://linkedin.com/in/stevenou"
+  },
+  "education": {
+    "school": "Queens College, CUNY",
+    "degree": "Bachelor of Arts in Computer Science",
+    "grad_date": "May 2027"
+  },
+  "resume_path": "./Steven_Ou_Resume.pdf"
+}
