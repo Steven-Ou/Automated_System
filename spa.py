@@ -28,3 +28,8 @@ def run_automation(job_urls):
             page.get_by_label("First Name").fill(data['personal_info']['first_name'])
             page.get_by_label("Last Name").fill(data['personal_info']['last_name'])
             page.get_by_label("Email").fill(data['personal_info']['email'])
+            
+            print(f"Finished processing {url}")
+            time.sleep(5)
+            
+        browser.close()
