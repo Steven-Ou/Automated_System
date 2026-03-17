@@ -1,3 +1,4 @@
+#Simple page application
 import json
 import time
 import random
