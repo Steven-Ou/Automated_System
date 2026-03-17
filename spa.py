@@ -24,3 +24,7 @@ def run_automation(job_urls):
                 print("Resume uploaded.")
             except:
                 print("No auto-upload found, proceeding to fields.")
+                
+            page.get_by_label("First Name").fill(data['personal_info']['first_name'])
+            page.get_by_label("Last Name").fill(data['personal_info']['last_name'])
+            page.get_by_label("Email").fill(data['personal_info']['email'])
