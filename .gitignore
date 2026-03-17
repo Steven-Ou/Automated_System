@@ -1,0 +1,11 @@
+# Playwright session data
+auth.json
+user_data/
+
+# Python environment
+__pycache__/
+*.pyc
+.env
+
+# MacOS files
+.DS_Store
