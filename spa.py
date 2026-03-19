@@ -4,7 +4,8 @@ import time
 import random
 from playwright.sync_api import sync_playwright
 
-
+class JobAutomator:
+    
 def run_automation(job_urls):
     with sync_playwright() as p:
         user_data_dir = "./user_data"
