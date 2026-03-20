@@ -5,7 +5,10 @@ import random
 from playwright.sync_api import sync_playwright
 
 class JobAutomator:
-    
+    def __init__(self, profile_path="profile.json", user_data_dir="./user_data"):
+        with open(profile_path) as f:
+            self.data = json.load(f)
+        self.user_data_dir = user_data_dir
 def run_automation(job_urls):
     with sync_playwright() as p:
         user_data_dir = "./user_data"
