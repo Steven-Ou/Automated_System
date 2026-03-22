@@ -9,6 +9,38 @@ class JobAutomator:
         with open(profile_path) as f:
             self.data = json.load(f)
         self.user_data_dir = user_data_dir
+        
+    def fill_form_field(self, page, label_element):
+        label_text = label_element.inner_text().lower()
+        input_id = label_element.get_attribute("for")
+        
+        if not input_id:
+            return
+
+        target = page.locator(f"#{input_id}")
+        if not target.is_visible():
+            return
+
+        tag_name = target.evaluate("el => el.tagName").lower()
+
+        # Simple logic to match profile data to form labels
+        answer = "Yes" # Default fallback
+        for key, val in self.data['personal_info'].items():
+            if key.replace("_", " ") in label_text:
+                answer = val
+
+        if tag_name == "input":
+            input_type = target.get_attribute("type")
+            if input_type in ["radio", "checkbox"]:
+                if answer.lower() in label_text:
+                    target.check()
+            else:
+                target.fill(answer)
+        elif tag_name == "select":
+            target.select_option(label=answer)
+        elif tag_name == "textarea":
+            target.fill(answer)
+        
 def run_automation(job_urls):
     with sync_playwright() as p:
         user_data_dir = "./user_data"
