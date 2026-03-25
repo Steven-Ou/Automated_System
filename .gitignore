@@ -2,6 +2,9 @@
 auth.json
 user_data/
 
+#personal data
+profile.json
+
 # Python environment
 __pycache__/
 *.pyc
@@ -9,3 +12,4 @@ __pycache__/
 
 # MacOS files
 .DS_Store
+
