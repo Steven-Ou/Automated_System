@@ -40,7 +40,28 @@ class JobAutomator:
             target.select_option(label=answer)
         elif tag_name == "textarea":
             target.fill(answer)
-        
+    def handle_easy_apply(self, page):
+        """Navigates the multi-step LinkedIn Easy Apply modal."""
+        while True:
+            resume_input = page.get_by_label("Upload resume")
+            if resume_input.is_visible():
+                resume_input.set_input_files(self.data['resume_path'])
+
+            all_labels = page.query_selector_all("label")
+            for label in all_labels:
+                self.fill_form_field(page, label)
+
+            btn_next = page.get_by_role("button", name=re.compile(r"Next|Continue|Review", re.I))
+            btn_submit = page.get_by_role("button", name=re.compile(r"Submit application", re.I))
+
+            if btn_submit.is_visible():
+                print("Application ready for manual review/submission.")
+                break 
+            elif btn_next.is_visible():
+                btn_next.click()
+                time.sleep(random.uniform(1, 2))
+            else:
+                break    
 def run_automation(job_urls):
     with sync_playwright() as p:
         user_data_dir = "./user_data"
