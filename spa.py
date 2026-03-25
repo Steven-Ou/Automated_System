@@ -92,3 +92,8 @@ class JobAutomator:
                 time.sleep(2)
 
             browser.close()
+if __name__ == "__main__":
+    automator = JobAutomator()
+    # Add LinkedIn job URLs here
+    urls = [] 
+    automator.run(urls)
