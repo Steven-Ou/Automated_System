@@ -69,6 +69,17 @@ class JobAutomator:
             else:
                 break
 
+    def handle_external_apply(self, context, job_url):
+        page = context.new_page()
+        page.goto(job_url)
+        time.sleep(5)
+        apply_button = page.get_by_role(
+            "button", name=re.compile(r"Apply Now|Apply for this job", re.I)
+        )
+        if apply_button.is_visible():
+            apply_button.click()
+            self.scan_and_fill_external_form(page)
+
     def run(self, job_urls):
         with sync_playwright() as p:
             # Uses persistent context to stay logged in
@@ -92,8 +103,10 @@ class JobAutomator:
                 time.sleep(2)
 
             browser.close()
+
+
 if __name__ == "__main__":
     automator = JobAutomator()
     # Add LinkedIn job URLs here
-    urls = [] 
+    urls = []
     automator.run(urls)
