@@ -80,6 +80,8 @@ class JobAutomator:
             apply_button.click()
             self.scan_and_fill_external_form(page)
 
+    def scan_and_fill_external(self,page):
+        
     def run(self, job_urls):
         with sync_playwright() as p:
             # Uses persistent context to stay logged in
