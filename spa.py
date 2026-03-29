@@ -81,6 +81,7 @@ class JobAutomator:
             self.scan_and_fill_external_form(page)
 
     def scan_and_fill_external(self,page):
+        inputs = page.query_selector_all("input, textarea, select")
         
     def run(self, job_urls):
         with sync_playwright() as p:
