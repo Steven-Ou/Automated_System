@@ -83,6 +83,10 @@ class JobAutomator:
     def scan_and_fill_external(self,page):
         inputs = page.query_selector_all("input, textarea, select")
         
+        for item in inputs:
+            placeholder = (item.get_attribute("placeholder") or "").lower()
+            
+            
     def run(self, job_urls):
         with sync_playwright() as p:
             # Uses persistent context to stay logged in
