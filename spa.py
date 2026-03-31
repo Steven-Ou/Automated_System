@@ -85,10 +85,11 @@ class JobAutomator:
         
         for item in inputs:
             placeholder = (item.get_attribute("placeholder") or "").lower()
-            
+            aria_label = (item.get_attribute("aria-label") or "").lower()
+            name_attr = (item.get_attribute("name") or "").lower()
             
     def run(self, job_urls):
-        with sync_playwright() as p:
+   s     with sync_playwright() as p:
             # Uses persistent context to stay logged in
             browser = p.chromium.launch_persistent_context(
                 self.user_data_dir, headless=False
