@@ -80,16 +80,16 @@ class JobAutomator:
             apply_button.click()
             self.scan_and_fill_external_form(page)
 
-    def scan_and_fill_external(self,page):
+    def scan_and_fill_external(self, page):
         inputs = page.query_selector_all("input, textarea, select")
-        
+
         for item in inputs:
             placeholder = (item.get_attribute("placeholder") or "").lower()
             aria_label = (item.get_attribute("aria-label") or "").lower()
             name_attr = (item.get_attribute("name") or "").lower()
-            
+
     def run(self, job_urls):
-   s     with sync_playwright() as p:
+        with sync_playwright() as p:
             # Uses persistent context to stay logged in
             browser = p.chromium.launch_persistent_context(
                 self.user_data_dir, headless=False
