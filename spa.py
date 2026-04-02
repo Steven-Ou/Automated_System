@@ -87,7 +87,13 @@ class JobAutomator:
             placeholder = (item.get_attribute("placeholder") or "").lower()
             aria_label = (item.get_attribute("aria-label") or "").lower()
             name_attr = (item.get_attribute("name") or "").lower()
-
+        if "first" in placeholder or "first" in name_attr:
+            item.fill(self.data['personal_info']['first_name'])
+        elif "last" in placeholder or "last" in name_attr:
+            item.fill(self.data['personal_info']['last_name'])
+        elif "email" in placeholder or "email" in name_attr:
+            item.fill(self.data['personal_info']['email'])
+            
     def run(self, job_urls):
         with sync_playwright() as p:
             # Uses persistent context to stay logged in
