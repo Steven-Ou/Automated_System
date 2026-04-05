@@ -2,7 +2,11 @@
   "manifest_version": 3,
   "name": "Steven's Job Autocompleter",
   "version": "1.0",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://*.greenhouse.io/*"
+  ],
   "action": {
     "default_popup": "popup.html"
   },
