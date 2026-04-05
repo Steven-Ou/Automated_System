@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Steven's Job Autocompleter",
+  "version": "1.0",
+  "permissions": ["storage", "activeTab"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.linkedin.com/*", "https://*.greenhouse.io/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
