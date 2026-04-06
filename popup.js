@@ -13,9 +13,14 @@ document.getElementById("fillButton").addEventListener("click", async () => {
           last_name: "Ou",
           email: "osteve425@gmail.com",
           phone: "347-255-2896",
-          linkedin: "https://www.linkedin.com/in/steven-ou-", // Added from your resume
+          linkedin: "https://www.linkedin.com/in/steven-ou-",
           github: "https://github.com/Steven-Ou",
           school: "Queens College / CUNY",
+          grad_date: "May 2027",
+          projects: ["YT-Link", "Instagram Checker", "Honey Academy"],
+          skills: ["Python", "Java", "React.js", "Node.js", "SQL"],
+          resume_link:
+            "https://drive.google.com/file/d/1zlgqxUOO8idkDFunkmvTVgolCes4mqfH/view", // Your link
         },
       });
       console.log("Profile data seeded with LinkedIn URL.");
