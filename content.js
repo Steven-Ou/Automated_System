@@ -1,32 +1,60 @@
 // content.js
-chrome.storage.local.get(['profile'], (result) => {
+chrome.storage.local.get(["profile"], (result) => {
   const data = result.profile;
-  
-  if (!data) {
-    console.error("No profile data found in storage!");
-    return;
-  }
+  if (!data) return;
 
-  const inputs = document.querySelectorAll('input, select, textarea');
+  const inputs = document.querySelectorAll("input, select, textarea");
 
-  inputs.forEach(input => {
-    const label = document.querySelector(`label[for="${input.id}"]`)?.innerText.toLowerCase() || "";
-    const placeholder = (input.getAttribute("placeholder") || "").toLowerCase();
+  inputs.forEach((input) => {
+    // Get identifying text from label, name, or placeholder
+    const label =
+      document
+        .querySelector(`label[for="${input.id}"]`)
+        ?.innerText.toLowerCase() || "";
     const name = (input.name || "").toLowerCase();
+    const placeholder = (input.getAttribute("placeholder") || "").toLowerCase();
+    const combinedText = `${label} ${name} ${placeholder}`;
 
-    // Combined logic from your spa.py and content.js
-    if (label.includes("first name") || name.includes("first") || placeholder.includes("first")) {
-      input.value = data.first_name;
-    } else if (label.includes("last name") || name.includes("last") || placeholder.includes("last")) {
-      input.value = data.last_name;
-    } else if (label.includes("email") || name.includes("email")) {
-      input.value = data.email;
-    } else if (label.includes("school") || label.includes("university")) {
-      input.value = "Queens College / CUNY"; 
+    // 1. Handle Text Inputs
+    if (
+      input.type === "text" ||
+      input.type === "email" ||
+      input.tagName === "TEXTAREA"
+    ) {
+      if (combinedText.includes("first name") || name === "firstname") {
+        input.value = data.first_name;
+      } else if (combinedText.includes("last name") || name === "lastname") {
+        input.value = data.last_name;
+      } else if (combinedText.includes("email")) {
+        input.value = data.email;
+      } else if (
+        combinedText.includes("phone") ||
+        combinedText.includes("mobile")
+      ) {
+        input.value = data.phone; // 347-255-2896
+      } else if (combinedText.includes("linkedin")) {
+        input.value = data.linkedin; // https://linkedin.com/in/steven-ou-
+      } else if (combinedText.includes("github")) {
+        input.value = data.github;
+      }
     }
-    
-    // Crucial for React/Next.js sites (like LinkedIn) to "see" the new text
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 2. Handle Radio Buttons (Like the Sponsorship question in your screenshot)
+    if (input.type === "radio") {
+      // Logic for: "Will you require sponsorship?"
+      if (
+        combinedText.includes("sponsorship") ||
+        combinedText.includes("visa")
+      ) {
+        // Based on your profile, we assume "No"
+        if (label.includes("no")) {
+          input.checked = true;
+        }
+      }
+    }
+
+    // 3. Trigger events so the site's React/Vue state updates
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
   });
 });
