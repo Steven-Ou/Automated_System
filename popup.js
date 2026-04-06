@@ -45,3 +45,9 @@ document.getElementById("fillButton").addEventListener("click", async () => {
     );
   });
 });
+document.getElementById('saveKey').addEventListener('click', () => {
+  const key = document.getElementById('apiKeyInput').value;
+  chrome.storage.local.set({ gemini_api_key: key }, () => {
+    alert("API Key saved to Chrome storage!");
+  });
+});
