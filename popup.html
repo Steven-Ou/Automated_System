@@ -15,7 +15,18 @@
     <div class="status-item"><span>School:</span><strong>Queens College</strong></div>
     <div class="status-item"><span>Graduation:</span><strong>May 2027</strong></div>
   </div>
-  <button id="fillButton" class="btn-blue">⚡ Autofill This Page</button>
+  <div class="grid grid-cols-1 gap-3">
+  <button id="fillButton" class="group relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-all hover:bg-blue-700 active:scale-95 shadow-md">
+    <div class="mr-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 group-hover:bg-blue-400">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+        <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5a.75.75 0 00.564 1.25H9.25l-1.233 6.093a.75.75 0 001.292.657l8.5-9.5a.75.75 0 00-.564-1.25H10.75l1.233-6.093z" />
+      </svg>
+    </div>
+    <span class="tracking-wide">Autofill Application</span>
+  </button>
+  
+  <p id="statusMsg" class="text-[10px] text-center text-gray-400 font-medium italic"></p>
+</div>
   <script src="popup.js"></script>
 </body>
 </html>
