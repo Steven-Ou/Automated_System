@@ -1,4 +1,19 @@
 // content.js
+function getJobContext() {
+  const selectors = [
+    '.job-details', '.description', '[class*="jobDescription"]', 
+    '#job-details', '.jobs-description-content'
+  ];
+  
+  let description = "";
+  selectors.forEach(s => {
+    const el = document.querySelector(s);
+    if (el) description += el.innerText;
+  });
+
+  const title = document.querySelector('h1')?.innerText || "this role";
+  return { title, description: description.substring(0, 1000) }; // Limit context size
+}
 chrome.storage.local.get(["profile"], (result) => {
   const data = result.profile;
   if (!data) return;
@@ -56,3 +71,4 @@ chrome.storage.local.get(["profile"], (result) => {
     input.dispatchEvent(new Event("change", { bubbles: true }));
   });
 });
+
