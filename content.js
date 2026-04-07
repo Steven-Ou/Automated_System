@@ -1,7 +1,13 @@
 function setNativeValue(element, value) {
-  const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+  const valueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value",
+  ).set;
   const prototype = Object.getPrototypeOf(element);
-  const prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+  const prototypeValueSetter = Object.getOwnPropertyDescriptor(
+    prototype,
+    "value",
+  )?.set;
 
   if (valueSetter && valueSetter !== prototypeValueSetter) {
     prototypeValueSetter.call(element, value);
@@ -9,9 +15,9 @@ function setNativeValue(element, value) {
     valueSetter.call(element, value);
   }
   // Dispatch events to tell React the data actually changed
-  element.dispatchEvent(new Event('input', { bubbles: true }));
-  element.dispatchEvent(new Event('change', { bubbles: true }));
-  element.dispatchEvent(new Event('blur', { bubbles: true }));
+  element.dispatchEvent(new Event("input", { bubbles: true }));
+  element.dispatchEvent(new Event("change", { bubbles: true }));
+  element.dispatchEvent(new Event("blur", { bubbles: true }));
 }
 //Helper function to scrape job title and description for Gemini context
 function getJobContext() {
@@ -50,38 +56,53 @@ chrome.storage.local.get(["profile"], (result) => {
   const jobContext = getJobContext();
 
   inputs.forEach((input) => {
-    const label = document.querySelector(`label[for="${input.id}"]`)?.innerText.toLowerCase() || "";
-    // Expanding parentText to .closest('div') captures more context for radio buttons
-    const parentText = input.closest('div')?.innerText.toLowerCase() || ""; 
+    const label =
+      document
+        .querySelector(`label[for="${input.id}"]`)
+        ?.innerText.toLowerCase() || "";
+    // Capture the parent div text to find "Sponsorship" keywords near the radio buttons
+    const parentContainer = input.closest("div");
+    const parentText = parentContainer?.innerText.toLowerCase() || "";
     const name = (input.name || "").toLowerCase();
     const placeholder = (input.getAttribute("placeholder") || "").toLowerCase();
-    const combinedText = `${label} ${name} ${placeholder} ${parentText}`.toLowerCase();
+    const combinedText =
+      `${label} ${name} ${placeholder} ${parentText}`.toLowerCase();
 
     // --- A. Handle Visas/Sponsorship (Radio Buttons) ---
     if (input.type === "radio") {
-        if (combinedText.includes("visa") || combinedText.includes("sponsorship")) {
-        // Use .click() instead of .checked = true for better framework compatibility
+      if (
+        combinedText.includes("visa") ||
+        combinedText.includes("sponsorship")
+      ) {
+        // Find the specific label for THIS radio option (e.g., the "No" text next to the circle)
         const optionLabel = input.parentElement.innerText.toLowerCase();
         if (optionLabel.includes("no")) {
-            input.click(); 
+          input.click(); // Physically click it to trigger React state
         }
-        }
+      }
     }
 
-    // --- B. Handle Text Inputs & Textareas (Identity Fields) ---
-    if (input.type === "text" || input.type === "email" || input.tagName === "TEXTAREA") {
-        // Use setNativeValue instead of input.value = data.field
-        if (combinedText.includes("first name") || name === "firstname") {
-        setNativeValue(input, data.first_name); 
-        } else if (combinedText.includes("last name") || name === "lastname") {
-        setNativeValue(input, data.last_name); 
-        } else if (combinedText.includes("email")) {
-        setNativeValue(input, data.email); 
-        } else if (combinedText.includes("phone") || combinedText.includes("mobile")) {
-        setNativeValue(input, data.phone); 
-        } else if (combinedText.includes("linkedin")) {
-        setNativeValue(input, data.linkedin); 
-        }
+    // --- B. Handle Text Inputs & Textareas ---
+    if (
+      input.type === "text" ||
+      input.type === "email" ||
+      input.tagName === "TEXTAREA"
+    ) {
+      // 1. Basic Identity Fields (Using Native Setter)
+      if (combinedText.includes("first name") || name === "firstname") {
+        setNativeValue(input, data.first_name);
+      } else if (combinedText.includes("last name") || name === "lastname") {
+        setNativeValue(input, data.last_name);
+      } else if (combinedText.includes("email")) {
+        setNativeValue(input, data.email);
+      } else if (
+        combinedText.includes("phone") ||
+        combinedText.includes("mobile")
+      ) {
+        setNativeValue(input, data.phone);
+      } else if (combinedText.includes("linkedin")) {
+        setNativeValue(input, data.linkedin);
+      }
 
       // 2. AI-Generated "Why this role?" Logic
       if (
@@ -89,7 +110,6 @@ chrome.storage.local.get(["profile"], (result) => {
         combinedText.includes("why") ||
         combinedText.includes("interest")
       ) {
-        // Send request to background.js to call Gemini
         chrome.runtime.sendMessage(
           {
             type: "GENERATE_ANSWER",
@@ -102,17 +122,12 @@ chrome.storage.local.get(["profile"], (result) => {
           },
           (response) => {
             if (response && response.answer) {
-              input.value = response.answer;
-              // Re-trigger events after AI fills the field
-              input.dispatchEvent(new Event("input", { bubbles: true }));
+              // FIX: Use setNativeValue here too so the AI answer isn't ignored by React
+              setNativeValue(input, response.answer);
             }
           },
         );
       }
     }
-
-    // 3. Trigger events so modern sites (React/Next.js) recognize the input
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
   });
 });
