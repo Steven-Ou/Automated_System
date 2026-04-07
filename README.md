@@ -45,7 +45,7 @@
 ## ⚙️ Configuration
 
 1.  Click the extension icon in your Chrome toolbar to open the popup.
-2.  Paste your **Gemini API Key** into the configuration field and click **Save Key**.
+2.  Paste your **Gemini API Key Or Any Other A.I You USE !** into the configuration field and click **Save Key**.
 3.  The extension is pre-seeded with profile data for **Steven Ou**. To customize the information used to fill forms, update the `profile` object in `popup.js`.
 
 ## 📂 Project Structure
