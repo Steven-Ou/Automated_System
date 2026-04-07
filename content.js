@@ -1,114 +1,111 @@
-// 1. Helper function to scrape job title and description for Gemini context
+// 1. Function to bypass React/Next.js state blocks
+function setNativeValue(element, value) {
+  const valueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value",
+  ).set;
+  const prototype = Object.getPrototypeOf(element);
+  const prototypeValueSetter = Object.getOwnPropertyDescriptor(
+    prototype,
+    "value",
+  )?.set;
+
+  if (valueSetter && valueSetter !== prototypeValueSetter) {
+    prototypeValueSetter.call(element, value);
+  } else {
+    valueSetter.call(element, value);
+  }
+  // Dispatch events to tell the website the value has changed
+  element.dispatchEvent(new Event("input", { bubbles: true }));
+  element.dispatchEvent(new Event("change", { bubbles: true }));
+  element.dispatchEvent(new Event("blur", { bubbles: true }));
+}
+
+// 2. Scrape Job Context for Gemini
 function getJobContext() {
   const selectors = [
     ".job-details",
     ".description",
     '[class*="jobDescription"]',
-    "#job-details",
     ".jobs-description-content",
-    ".job-view-layout",
   ];
-
   let description = "";
   selectors.forEach((s) => {
     const el = document.querySelector(s);
     if (el && el.innerText.length > description.length)
       description = el.innerText;
   });
-
-  const title = document.querySelector("h1")?.innerText || "this role";
-  // Return a truncated version to stay within prompt limits
-  return { title, description: description.substring(0, 1200) };
+  return {
+    title: document.querySelector("h1")?.innerText || "this role",
+    description: description.substring(0, 1000),
+  };
 }
 
-// 2. Main fill logic
+// 3. Main Fill Logic
 chrome.storage.local.get(["profile"], (result) => {
   const data = result.profile;
-  if (!data) {
-    console.error(
-      "No profile data found. Please open the extension popup first.",
-    );
-    return;
-  }
+  if (!data) return;
 
   const inputs = document.querySelectorAll("input, select, textarea");
-  const jobContext = getJobContext();
+  const context = getJobContext();
 
   inputs.forEach((input) => {
     const label =
       document
         .querySelector(`label[for="${input.id}"]`)
         ?.innerText.toLowerCase() || "";
-    const parentText = input.parentElement?.innerText.toLowerCase() || "";
+    const parent = input.closest("div")?.innerText.toLowerCase() || "";
     const name = (input.name || "").toLowerCase();
-    const placeholder = (input.getAttribute("placeholder") || "").toLowerCase();
-    const combinedText = `${label} ${name} ${placeholder}`.toLowerCase();
+    const combined =
+      `${label} ${name} ${input.placeholder} ${parent}`.toLowerCase();
 
-    // --- A. Handle Visas/Sponsorship (Radio Buttons) ---
-    if (input.type === "radio") {
-      if (
-        combinedText.includes("visa") ||
-        combinedText.includes("sponsorship")
-      ) {
-        // Automatically check the "No" option based on your profile
-        if (parentText.includes("no") || label.includes("no")) {
-          input.checked = true;
-        }
+    // --- A. Visa / Sponsorship (Always No) ---
+    if (
+      input.type === "radio" &&
+      (combined.includes("visa") || combined.includes("sponsorship"))
+    ) {
+      if (input.parentElement.innerText.toLowerCase().includes("no")) {
+        input.click();
       }
     }
 
-    // --- B. Handle Text Inputs & Textareas (AI Logic) ---
+    // --- B. AI-Powered Questions ---
+    if (
+      combined.includes("excite") ||
+      combined.includes("why") ||
+      combined.includes("interest")
+    ) {
+      chrome.runtime.sendMessage(
+        {
+          type: "GENERATE_ANSWER",
+          payload: {
+            jobTitle: context.title,
+            jobDesc: context.description,
+            userProjects: data.projects,
+            userSchool: data.school,
+          },
+        },
+        (response) => {
+          if (response?.answer) setNativeValue(input, response.answer);
+        },
+      );
+    }
+
+    // --- C. Standard Fields (Using Native Setter) ---
     if (
       input.type === "text" ||
       input.type === "email" ||
       input.tagName === "TEXTAREA"
     ) {
-      // 1. Basic Identity Fields
-      if (combinedText.includes("first name") || name === "firstname") {
-        input.value = data.first_name;
-      } else if (combinedText.includes("last name") || name === "lastname") {
-        input.value = data.last_name;
-      } else if (combinedText.includes("email")) {
-        input.value = data.email;
-      } else if (
-        combinedText.includes("phone") ||
-        combinedText.includes("mobile")
-      ) {
-        input.value = data.phone;
-      } else if (combinedText.includes("linkedin")) {
-        input.value = data.linkedin;
-      }
-
-      // 2. AI-Generated "Why this role?" Logic
-      if (
-        combinedText.includes("excite") ||
-        combinedText.includes("why") ||
-        combinedText.includes("interest")
-      ) {
-        // Send request to background.js to call Gemini
-        chrome.runtime.sendMessage(
-          {
-            type: "GENERATE_ANSWER",
-            payload: {
-              jobTitle: jobContext.title,
-              jobDesc: jobContext.description,
-              userProjects: data.projects || ["YT-Link", "Instagram Checker"],
-              userSchool: data.school || "Queens College / CUNY",
-            },
-          },
-          (response) => {
-            if (response && response.answer) {
-              input.value = response.answer;
-              // Re-trigger events after AI fills the field
-              input.dispatchEvent(new Event("input", { bubbles: true }));
-            }
-          },
-        );
-      }
+      if (combined.includes("first name"))
+        setNativeValue(input, data.first_name);
+      else if (combined.includes("last name"))
+        setNativeValue(input, data.last_name);
+      else if (combined.includes("email")) setNativeValue(input, data.email);
+      else if (combined.includes("phone"))
+        setNativeValue(input, data.phone); // 347-255-2896
+      else if (combined.includes("linkedin"))
+        setNativeValue(input, data.linkedin);
     }
-
-    // 3. Trigger events so modern sites (React/Next.js) recognize the input
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
   });
 });
