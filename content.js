@@ -50,49 +50,38 @@ chrome.storage.local.get(["profile"], (result) => {
   const jobContext = getJobContext();
 
   inputs.forEach((input) => {
-    const label =
-      document
-        .querySelector(`label[for="${input.id}"]`)
-        ?.innerText.toLowerCase() || "";
-    const parentText = input.parentElement?.innerText.toLowerCase() || "";
+    const label = document.querySelector(`label[for="${input.id}"]`)?.innerText.toLowerCase() || "";
+    // Expanding parentText to .closest('div') captures more context for radio buttons
+    const parentText = input.closest('div')?.innerText.toLowerCase() || ""; 
     const name = (input.name || "").toLowerCase();
     const placeholder = (input.getAttribute("placeholder") || "").toLowerCase();
-    const combinedText = `${label} ${name} ${placeholder}`.toLowerCase();
+    const combinedText = `${label} ${name} ${placeholder} ${parentText}`.toLowerCase();
 
     // --- A. Handle Visas/Sponsorship (Radio Buttons) ---
     if (input.type === "radio") {
-      if (
-        combinedText.includes("visa") ||
-        combinedText.includes("sponsorship")
-      ) {
-        // Automatically check the "No" option based on your profile
-        if (parentText.includes("no") || label.includes("no")) {
-          input.checked = true;
+        if (combinedText.includes("visa") || combinedText.includes("sponsorship")) {
+        // Use .click() instead of .checked = true for better framework compatibility
+        const optionLabel = input.parentElement.innerText.toLowerCase();
+        if (optionLabel.includes("no")) {
+            input.click(); 
         }
-      }
+        }
     }
 
-    // --- B. Handle Text Inputs & Textareas (AI Logic) ---
-    if (
-      input.type === "text" ||
-      input.type === "email" ||
-      input.tagName === "TEXTAREA"
-    ) {
-      // 1. Basic Identity Fields
-      if (combinedText.includes("first name") || name === "firstname") {
-        input.value = data.first_name;
-      } else if (combinedText.includes("last name") || name === "lastname") {
-        input.value = data.last_name;
-      } else if (combinedText.includes("email")) {
-        input.value = data.email;
-      } else if (
-        combinedText.includes("phone") ||
-        combinedText.includes("mobile")
-      ) {
-        input.value = data.phone;
-      } else if (combinedText.includes("linkedin")) {
-        input.value = data.linkedin;
-      }
+    // --- B. Handle Text Inputs & Textareas (Identity Fields) ---
+    if (input.type === "text" || input.type === "email" || input.tagName === "TEXTAREA") {
+        // Use setNativeValue instead of input.value = data.field
+        if (combinedText.includes("first name") || name === "firstname") {
+        setNativeValue(input, data.first_name); 
+        } else if (combinedText.includes("last name") || name === "lastname") {
+        setNativeValue(input, data.last_name); 
+        } else if (combinedText.includes("email")) {
+        setNativeValue(input, data.email); 
+        } else if (combinedText.includes("phone") || combinedText.includes("mobile")) {
+        setNativeValue(input, data.phone); 
+        } else if (combinedText.includes("linkedin")) {
+        setNativeValue(input, data.linkedin); 
+        }
 
       // 2. AI-Generated "Why this role?" Logic
       if (
